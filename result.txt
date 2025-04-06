@@ -1,0 +1,35 @@
+Number of processors: 12
+Existing edges: 571
+Total missing edges to process: 19133
+117.708 127
+BETWEENESS minimised at 78 157
+STRESS minimised at 3 4
+Total execution time: 9 s
+Number of processors: 12
+Existing edges: 543
+Total missing edges to process: 10487
+78.6064 148
+BETWEENESS minimised at 4 15
+STRESS minimised at 87 122
+Total execution time: 3 s
+Number of processors: 12
+Existing edges: 940
+Total missing edges to process: 18766
+180.344 256
+BETWEENESS minimised at 63 116
+STRESS minimised at 40 105
+Total execution time: 12 s
+Number of processors: 12
+Existing edges: 409
+Total missing edges to process: 10620
+103.094 123
+BETWEENESS minimised at 3 11
+STRESS minimised at 52 86
+Total execution time: 3 s
+Number of processors: 12
+Existing edges: 743
+Total missing edges to process: 18962
+128.037 213
+BETWEENESS minimised at 16 35
+STRESS minimised at 110 197
+Total execution time: 12 s

@@ -8,6 +8,8 @@
 #include <utility>
 #include <chrono>
 #include <omp.h>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
 using namespace std::chrono;
@@ -16,33 +18,49 @@ class Graph {
 public:
     vector<vector<int>> adj;
     vector<pair<int, int>> edges;  
-    
+        
     void readGraph(const string& filename) {
+        unordered_map<int, vector<int>> adj_map;
         ifstream file(filename);
         if (!file.is_open()) {
             cerr << "Error opening file: " << filename << endl;
             return;
         }
+    
+        adj_map.clear();
+        edges.clear();
+    
         string line;
         while (getline(file, line)) {
             if (line.empty() || line[0] == '#') continue;
-            break;
-        }
-        edges.clear();
-        while(getline(file, line)) {
-            if (line.empty()) continue;
+    
             istringstream iss(line);
-            int v;
-            adj.push_back({});
             int u;
-            iss >> u;
+            if (!(iss >> u)) continue; 
+    
+            unordered_set<int> neighbors;
+            int v;
             while (iss >> v) {
-                adj.back().push_back(v);
+                if (u == v) continue; 
+                neighbors.insert(v);
+            }
+    
+            for (int v : neighbors) {
                 if (u < v) {
                     edges.emplace_back(u, v);
+                } else if (v < u && adj_map.find(v) == adj_map.end()) {
+                    edges.emplace_back(v, u);
                 }
+    
+                adj_map[u].push_back(v);
+                adj_map[v].push_back(u);
             }
         }
+
+        for(auto x:adj_map){
+            adj.push_back(x.second);
+        }
+    
         file.close();
     }
 
@@ -190,9 +208,7 @@ void solve(string filename){
                     cout << i << " done by thread " << omp_get_thread_num() << "\n" << flush;
                 }
             }
-        }
-        
-        // Update global minimums with thread-local results
+        }        
         #pragma omp critical
         {
             if (local_min_bet < min_betweenness) {
