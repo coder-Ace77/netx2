@@ -65,7 +65,7 @@ public:
         file.close();
     }
     
-    void addEdge(int u, int v) {
+    void addEdge(int u, int v){
         adj[u].push_back(v);
         adj[v].push_back(u);
     }
@@ -83,7 +83,9 @@ public:
         }
         return missingEdges;
     }
+    
     vector<vector<int>> pred;
+
     inline pair<double, long long> compute(pair<int,int> curr){
         int V = adj.size();
         if(pred.size()<V){
@@ -94,9 +96,8 @@ public:
         int dist[V]={-1};
         long long sigma[V]={0}; 
         int predIND[V]={0};
-        int S[V];
+        stack<int> S;
         queue<int> Q;
-
         double max_bet = 0.0;
         long long max_stress = 0;
         for (int s=0;s<V;++s){
@@ -110,7 +111,7 @@ public:
             while(!Q.empty()){
                 int v = Q.front();
                 Q.pop();
-                S[stc++]=v;
+                S.push(v);
                 for(int i=0;i<adj[v].size();i++){
                     int w = adj[v][i];
                     if (dist[w]<0){
@@ -125,8 +126,9 @@ public:
                 }
             }    
             double delta[V]={0.0};
-            while (stc>0){
-                int w = S[stc--];
+            while (!S.empty()){
+                int w = S.top();
+                S.pop();
                 for (int i=0;i<predIND[w];i++){
                     int v = pred[w][i];
                     double contrib = ((double)sigma[v]*(1.0 + delta[w]))/sigma[w];
@@ -136,13 +138,16 @@ public:
                     }
                 }
                 if (w != s) {
-                    betweenness[w] += delta[w]/2.0;
-                }
-                max_bet = max(max_bet, betweenness[w]);
-                max_stress = max(max_stress, stress[w]);
-                if(max_bet>=curr.first && max_stress>=curr.second){
-                    return {max_bet,max_stress};
-                }
+                    betweenness[w]+=delta[w]/2.0;
+                }              
+            }
+        }
+        for (int i=0;i<V;++i){
+            if (betweenness[i] > max_bet) {
+                max_bet = betweenness[i];
+            }
+            if (stress[i] > max_stress) {
+                max_stress = stress[i];
             }
         }
         return {max_bet, max_stress};
@@ -277,6 +282,5 @@ int main(){
         string ss = "graph"+to_string(i)+".adjlist";
         solve_parallel(ss);
     }
-    // solve_parallel("graph2.adjlist");
     return 0;   
 }

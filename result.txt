@@ -1,35 +1,139 @@
-Number of processors: 12
-Existing edges: 571
-Total missing edges to process: 19133
-117.708 127
-BETWEENESS minimised at 78 157
-STRESS minimised at 3 4
-Total execution time: 9 s
-Number of processors: 12
-Existing edges: 543
-Total missing edges to process: 10487
-78.6064 148
-BETWEENESS minimised at 4 15
-STRESS minimised at 87 122
-Total execution time: 3 s
-Number of processors: 12
-Existing edges: 940
-Total missing edges to process: 18766
-180.344 256
-BETWEENESS minimised at 63 116
-STRESS minimised at 40 105
-Total execution time: 12 s
-Number of processors: 12
-Existing edges: 409
-Total missing edges to process: 10620
-103.094 123
-BETWEENESS minimised at 3 11
-STRESS minimised at 52 86
-Total execution time: 3 s
-Number of processors: 12
-Existing edges: 743
-Total missing edges to process: 18962
-128.037 213
-BETWEENESS minimised at 16 35
-STRESS minimised at 110 197
-Total execution time: 12 s
+Initial betweenness centrality: 3231.04 9563
+Existing edges: 0
+Total missing edges to process: 19900
+0 done (thread 0)
+1000 done (thread 9)
+2000 done (thread 11)
+3000 done (thread 10)
+4000 done (thread 10)
+5000 done (thread 11)
+6000 done (thread 6)
+7000 done (thread 2)
+8000 done (thread 0)
+9000 done (thread 6)
+10000 done (thread 2)
+11000 done (thread 7)
+12000 done (thread 9)
+13000 done (thread 9)
+14000 done (thread 0)
+15000 done (thread 4)
+16000 done (thread 3)
+17000 done (thread 5)
+18000 done (thread 7)
+19000 done (thread 10)
+
+Final Results:
+Minimum Betweenness Centrality: 3154.06
+Minimum Stress Centrality: 9195
+BETWEENNESS minimized at edge: (2, 168)
+STRESS minimized at edge: (4, 7)
+Total execution time: 25 seconds
+Average execution time: 1 ms
+Initial betweenness centrality: 1569.31 7419
+Existing edges: 0
+Total missing edges to process: 11175
+0 done (thread 0)
+1000 done (thread 1)
+2000 done (thread 10)
+3000 done (thread 1)
+4000 done (thread 3)
+5000 done (thread 1)
+6000 done (thread 0)
+7000 done (thread 4)
+8000 done (thread 10)
+9000 done (thread 10)
+10000 done (thread 2)
+11000 done (thread 1)
+
+Final Results:
+Minimum Betweenness Centrality: 1537.55
+Minimum Stress Centrality: 7302
+BETWEENNESS minimized at edge: (8, 138)
+STRESS minimized at edge: (15, 138)
+Total execution time: 9 seconds
+Average execution time: 0 ms
+Initial betweenness centrality: 2823.53 15405
+Existing edges: 0
+Total missing edges to process: 19900
+0 done (thread 0)
+1000 done (thread 7)
+2000 done (thread 11)
+3000 done (thread 7)
+4000 done (thread 7)
+5000 done (thread 0)
+6000 done (thread 3)
+7000 done (thread 10)
+8000 done (thread 9)
+9000 done (thread 7)
+10000 done (thread 8)
+11000 done (thread 6)
+12000 done (thread 11)
+13000 done (thread 5)
+14000 done (thread 6)
+15000 done (thread 7)
+16000 done (thread 10)
+17000 done (thread 3)
+18000 done (thread 3)
+19000 done (thread 3)
+
+Final Results:
+Minimum Betweenness Centrality: 2765.33
+Minimum Stress Centrality: 15268
+BETWEENNESS minimized at edge: (8, 180)
+STRESS minimized at edge: (8, 166)
+Total execution time: 33 seconds
+Average execution time: 1 ms
+Initial betweenness centrality: 2148.97 6577
+Existing edges: 0
+Total missing edges to process: 11175
+0 done (thread 0)
+1000 done (thread 3)
+2000 done (thread 6)
+3000 done (thread 1)
+4000 done (thread 1)
+5000 done (thread 10)
+6000 done (thread 0)
+7000 done (thread 4)
+8000 done (thread 9)
+9000 done (thread 1)
+10000 done (thread 8)
+11000 done (thread 6)
+
+Final Results:
+Minimum Betweenness Centrality: 2097.19
+Minimum Stress Centrality: 6427
+BETWEENNESS minimized at edge: (17, 35)
+STRESS minimized at edge: (6, 77)
+Total execution time: 8 seconds
+Average execution time: 0 ms
+Initial betweenness centrality: 2502.7 11727
+Existing edges: 0
+Total missing edges to process: 19900
+0 done (thread 0)
+1000 done (thread 8)
+2000 done (thread 8)
+3000 done (thread 10)
+4000 done (thread 9)
+5000 done (thread 10)
+6000 done (thread 2)
+7000 done (thread 1)
+8000 done (thread 11)
+9000 done (thread 6)
+10000 done (thread 8)
+11000 done (thread 8)
+12000 done (thread 0)
+13000 done (thread 2)
+14000 done (thread 11)
+15000 done (thread 6)
+16000 done (thread 6)
+17000 done (thread 3)
+18000 done (thread 11)
+19000 done (thread 3)
+
+Final Results:
+Minimum Betweenness Centrality: 2442.2
+Minimum Stress Centrality: 11464
+BETWEENNESS minimized at edge: (0, 167)
+STRESS minimized at edge: (12, 158)
+Total execution time: 29 seconds
+Average execution time: 1 ms
