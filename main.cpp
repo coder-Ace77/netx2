@@ -63,125 +63,6 @@ public:
         return missingEdges;
     }
 
-    // pair<double,long long> compute(){
-    //     int V = adj.size();
-    //     vector<double> betweenness(V, 0.0);
-    //     vector<long long> stress(V, 0);
-
-    //     for (int s = 0; s < V; ++s) {
-    //         vector<vector<int>> pred(V);
-    //         vector<int> dist(V, -1);
-    //         vector<long long> sigma(V, 0);
-    //         stack<int> S;
-    //         queue<int> Q;
-
-    //         dist[s] = 0;
-    //         sigma[s] = 1;
-    //         Q.push(s);
-
-    //         while (!Q.empty()) {
-    //             int v = Q.front(); Q.pop();
-    //             S.push(v);
-
-    //             for (int w : adj[v]) {
-    //                 if (dist[w] < 0) {
-    //                     dist[w] = dist[v] + 1;
-    //                     Q.push(w);
-    //                 }
-    //                 if (dist[w] == dist[v] + 1) {
-    //                     sigma[w] += sigma[v];
-    //                     pred[w].push_back(v);
-    //                 }
-    //             }
-    //         }
-
-    //         vector<double> delta(V, 0.0);
-    //         while (!S.empty()) {
-    //             int w = S.top(); S.pop();
-    //             for (int v : pred[w]) {
-    //                 double contrib = (sigma[v] * (1.0 + delta[w])) / sigma[w];
-    //                 delta[v] += contrib;
-    //             }
-    //             if (w != s) {
-    //                 betweenness[w] += delta[w] / 2.0;
-    //                 stress[w] += delta[w];
-    //             }
-    //         }
-    //     }
-
-    //     double mx_bet = 0;
-    //     long long mx_stress = 0;
-
-    //     for(int i=0;i<V;i++){
-    //         mx_bet = max(mx_bet,betweenness[i]);
-    //         mx_stress = max(mx_stress,stress[i]);
-    //     }
-
-    //     return {mx_bet,mx_stress};
-    // }
-
-    // pair<double, long long> compute() {
-    //     int V = adj.size();
-    //     vector<double> betweenness(V, 0.0);
-    //     vector<long long> stress(V, 0);
-    
-    //     for (int s = 0; s < V; ++s) {
-    //         vector<vector<int>> pred(V);     // predecessors
-    //         vector<int> dist(V, -1);         // distance from source
-    //         vector<long long> sigma(V, 0);   // number of shortest paths
-    //         stack<int> S;
-    //         queue<int> Q;
-    
-    //         dist[s] = 0;
-    //         sigma[s] = 1;
-    //         Q.push(s);
-    
-    //         while (!Q.empty()) {
-    //             int v = Q.front(); Q.pop();
-    //             S.push(v);
-    
-    //             for (int w : adj[v]) {
-    //                 if (dist[w] < 0) {
-    //                     dist[w] = dist[v] + 1;
-    //                     Q.push(w);
-    //                 }
-    //                 if (dist[w] == dist[v] + 1) {
-    //                     sigma[w] += sigma[v];
-    //                     pred[w].push_back(v);
-    //                 }
-    //             }
-    //         }
-    
-    //         // Accumulate betweenness and stress centrality
-    //         vector<double> delta(V, 0.0);
-    //         while (!S.empty()) {
-    //             int w = S.top(); S.pop();
-    //             for (int v : pred[w]) {
-    //                 double contrib = (sigma[v] * (1.0 + delta[w])) / sigma[w];
-    //                 delta[v] += contrib;
-    
-    //                 // Each time a node is used to forward shortest paths, it contributes to stress
-    //                 if (w != s) {
-    //                     stress[w] += sigma[v];  // this counts all shortest paths passing through w
-    //                 }
-    //             }
-    //             if (w != s) {
-    //                 betweenness[w] += delta[w] / 2.0;  // divide by 2 for undirected graphs
-    //             }
-    //         }
-    //     }
-    
-    //     double max_bet = 0.0;
-    //     long long max_stress = 0;
-    
-    //     for (int i = 0; i < V; ++i) {
-    //         max_bet = max(max_bet, betweenness[i]);
-    //         max_stress = max(max_stress, stress[i]);
-    //     }
-    
-    //     return {max_bet, max_stress};
-    // }  
-
     pair<double, long long> compute() {
         int V = adj.size();
         vector<double> betweenness(V, 0.0);
@@ -254,18 +135,28 @@ int main(){
     auto totalStart = high_resolution_clock::now();
     auto ans = g.compute();
     int cnt = 0;
+    pair<int,int> ed1 = {-1,-1};
+    pair<int,int> ed2 = {-1,-1};
     for(auto x:g.findMissingEdges()){
         g.addEdge(x.first,x.second);
         auto temp = g.compute();
-        ans.first = min(ans.first,temp.first);
-        ans.second = min(ans.second,temp.second);
+        if(ans.first>temp.first){
+            ans.first = temp.first;
+            ed1 = x;
+        }
+        if(ans.second>temp.second){
+            ans.second = temp.second;
+            ed2 = x;
+        }
         g.adj[x.first].pop_back();
         g.adj[x.second].pop_back();
         cnt++;
-        if(cnt%500==0)cout<<"="<<flush;
+        if(cnt%500==0)cout<<cnt<<" done \n"<<flush;
     }
 
     cout<<ans.first<<" "<<ans.second<<endl;
+    cout<<"BETWEENESS minimised at "<<ed1.first<<" "<<ed1.second<<endl;
+    cout<<"STRESS minimised at "<<ed2.first<<" "<<ed2.second<<endl;
     auto totalEnd = high_resolution_clock::now();
     auto totalDuration = duration_cast<seconds>(totalEnd - totalStart);
     cout << "Total execution time: " << totalDuration.count() << " s" << endl;
