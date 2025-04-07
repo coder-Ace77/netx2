@@ -280,7 +280,8 @@ void solve_sequential(const string& filename){
     cout << "Average execution time: " << totalDuration.count()/missingEdges.size() << " ms" << endl;
 }
 
-void test(string filename){
+void test(){
+    string filename = "grapht.adjlist";
     Graph g;
     g.readGraph(filename);
     auto ans = make_pair(1e9,(int)1e9);
@@ -288,7 +289,7 @@ void test(string filename){
 }
 
 int main(){
-    for(int i=1;i<=5;i++){
+    for(int i=0;i<=5;i++){
         string ss = "graph"+to_string(i)+".adjlist";
         solve_parallel(ss);
     }
