@@ -187,7 +187,7 @@ void solve_parallel(const string& filename,bool metrics = false , bool test = fa
             #pragma omp critical
             {
                 if (i % 1000 == 0) {
-                    cout<<"#";
+                    cout<<"#"<<flush;
                 }
             }
         }
