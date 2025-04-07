@@ -86,7 +86,7 @@ public:
     
     vector<vector<int>> pred;
 
-    inline pair<double, long long> compute(pair<int,int> curr){
+    inline pair<double, long long> compute(bool test=false){
         int V = adj.size();
         if(pred.size()<V){
             pred.resize(V,vector<int> (V));
@@ -104,7 +104,6 @@ public:
             fill(predIND,predIND+V,0);
             fill(dist,dist+V,-1);
             fill(sigma,sigma+V,0ll); 
-            int stc = 0;
             dist[s]=0;
             sigma[s]=1;
             Q.push(s);
@@ -138,8 +137,7 @@ public:
                 }
                 if (w != s) {
                     betweenness[w]+=delta[w];
-                    long long val=delta2[w]*sigma[w];
-                    stress[w]+=val;
+                    stress[w]+=delta2[w]*sigma[w];
                 }              
             }
         }
@@ -153,6 +151,9 @@ public:
                 max_stress = stress[i];
             }
         }
+        if(test){
+            for (int i=0;i<V;++i)cout << stress[i] << " ";
+        }
         return {max_bet, max_stress};
     }
 };
@@ -161,7 +162,7 @@ void solve_parallel(const string& filename){
     Graph g;
     g.readGraph(filename);
     auto ans = make_pair(1e9, (int)1e9);
-    ans = g.compute(ans);
+    ans = g.compute();
     cout << "Initial betweenness centrality: " << ans.first << " " << ans.second << endl;
     auto missingEdges = g.findMissingEdges();
     cout << "Total missing edges to process: " << missingEdges.size() << endl;
@@ -182,7 +183,7 @@ void solve_parallel(const string& filename){
         for (int i = 0; i < (int)missingEdges.size(); ++i){
             auto x = missingEdges[i];
             local_g.addEdge(x.first, x.second);
-            auto temp = local_g.compute(ans);
+            auto temp = local_g.compute();
 
             if (temp.first < local_min_betweenness) {
                 local_min_betweenness = temp.first;
@@ -198,7 +199,7 @@ void solve_parallel(const string& filename){
 
             if (i % 1000 == 0) {
                 #pragma omp critical
-                cout << i << " done (thread " << omp_get_thread_num() << ")\n";
+                cout << i << " done \n";
             }
         }
 
@@ -232,7 +233,7 @@ void solve_sequential(const string& filename){
     Graph g;
     g.readGraph(filename);
     auto ans = make_pair(1e9,(int)1e9);
-    ans = g.compute(ans);
+    ans = g.compute();
     cout << "Initial betweenness centrality, stress centrality : " << ans.first<<" "<<ans.second << endl;
     auto missingEdges = g.findMissingEdges();
     cout << "Total missing edges to process: " << missingEdges.size() << endl;
@@ -248,7 +249,7 @@ void solve_sequential(const string& filename){
     for (size_t i = 0; i < missingEdges.size(); ++i) {
         auto x = missingEdges[i];
         g.addEdge(x.first, x.second);
-        auto temp = g.compute(ans);
+        auto temp = g.compute();
 
         if(temp.first < min_betweenness){
             min_betweenness = temp.first;
@@ -279,11 +280,17 @@ void solve_sequential(const string& filename){
     cout << "Average execution time: " << totalDuration.count()/missingEdges.size() << " ms" << endl;
 }
 
+void test(string filename){
+    Graph g;
+    g.readGraph(filename);
+    auto ans = make_pair(1e9,(int)1e9);
+    ans = g.compute(true);
+}
+
 int main(){
     for(int i=1;i<=5;i++){
         string ss = "graph"+to_string(i)+".adjlist";
         solve_parallel(ss);
     }
-    // solve_sequential("graph1.adjlist");
     return 0;   
 }
