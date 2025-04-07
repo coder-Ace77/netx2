@@ -18,7 +18,6 @@ class Graph {
 public:
     vector<vector<int>> adj;
     vector<pair<int, int>> edges;  
-        
     void readGraph(const string& filename){
         ifstream file(filename);
         if (!file.is_open()) {
@@ -149,18 +148,20 @@ public:
     }
 };
 
-void solve_parallel(const string& filename){
+void solve_parallel(const string& filename,bool metrics = false , bool test = false){
     Graph g;
     g.readGraph(filename);
     auto ans = make_pair(1e9, (int)1e9);
     ans = g.compute();
-    cout << "Initial betweenness centrality: " << ans.first << " " << ans.second << endl;
     auto missingEdges = g.findMissingEdges();
-    cout << "Total missing edges to process: " << missingEdges.size() << endl;
     pair<int, int> ed1 = {-1, -1};
     pair<int, int> ed2 = {-1, -1};
     double min_betweenness = ans.first;
     long long min_stress = ans.second;
+    if(metrics){
+        cout << "Initial betweenness centrality: " << ans.first << " " << ans.second << endl;
+        cout << "Total missing edges to process: " << missingEdges.size() << endl;
+    }
     auto totalStart = high_resolution_clock::now();
     #pragma omp parallel
     {
@@ -187,10 +188,13 @@ void solve_parallel(const string& filename){
 
             local_g.adj[x.first].pop_back();
             local_g.adj[x.second].pop_back();
-
-            if (i % 1000 == 0) {
+            if(metrics){
                 #pragma omp critical
-                cout << i << " done \n";
+                {
+                    if (i % 1000 == 0) {
+                        cout << i << " done \n";
+                    }
+                }
             }
         }
 
@@ -207,17 +211,31 @@ void solve_parallel(const string& filename){
         }
     }
 
-    auto totalEnd = high_resolution_clock::now();
-    auto totalDuration = duration_cast<milliseconds>(totalEnd - totalStart);
-    auto totalDuration_SEC = duration_cast<seconds>(totalEnd - totalStart);
+    if(metrics){
+        auto totalEnd = high_resolution_clock::now();
+        auto totalDuration = duration_cast<milliseconds>(totalEnd - totalStart);
+        auto totalDuration_SEC = duration_cast<seconds>(totalEnd - totalStart);
+        cout << "\nFinal Results:" << endl;
+        cout << "Minimum Betweenness Centrality: " << min_betweenness << endl;
+        cout << "Minimum Stress Centrality: " << min_stress << endl;
+        cout << "BETWEENNESS minimized at edge: (" << ed1.first << ", " << ed1.second << ")" << endl;
+        cout << "STRESS minimized at edge: (" << ed2.first << ", " << ed2.second << ")" << endl;
+        cout << "Total execution time: " << totalDuration_SEC.count() << " seconds" << endl;
+        cout << "Average execution time: " << totalDuration.count() / missingEdges.size() << " ms" << endl;
+    }
+
+    if(test){
+        cout<<ans.first<<" "<<ans.second<<endl;
+        cout<<ed1.first<<" "<<ed1.second<<endl;
+        cout<<ed2.first<<" "<<ed2.second<<endl;
+    }
 
     cout << "\nFinal Results:" << endl;
     cout << "Minimum Betweenness Centrality: " << min_betweenness << endl;
     cout << "Minimum Stress Centrality: " << min_stress << endl;
     cout << "BETWEENNESS minimized at edge: (" << ed1.first << ", " << ed1.second << ")" << endl;
     cout << "STRESS minimized at edge: (" << ed2.first << ", " << ed2.second << ")" << endl;
-    cout << "Total execution time: " << totalDuration_SEC.count() << " seconds" << endl;
-    cout << "Average execution time: " << totalDuration.count() / missingEdges.size() << " ms" << endl;
+
 }
 
 void solve_sequential(const string& filename){
@@ -235,7 +253,6 @@ void solve_sequential(const string& filename){
     long long min_stress = ans.second;
     int cnt = 0;
 
-    auto totalStart = high_resolution_clock::now();
 
     for (size_t i = 0; i < missingEdges.size(); ++i) {
         auto x = missingEdges[i];
@@ -258,31 +275,22 @@ void solve_sequential(const string& filename){
     }
 
     cout << "\nFinal Results:" << endl;
+
     cout << "Minimum Betweenness Centrality: " << ans.first << endl;
     cout << "Minimum Stress Centrality: " << ans.second << endl;
 
     cout << "BETWEENNESS minimized at edge: (" << ed1.first << ", " << ed1.second << ")" << endl;
     cout << "STRESS minimized at edge: (" << ed2.first << ", " << ed2.second << ")" << endl;
-
-    auto totalEnd = high_resolution_clock::now();
-    auto totalDuration = duration_cast<milliseconds>(totalEnd - totalStart);
-    auto totalDuration_SEC = duration_cast<seconds>(totalEnd - totalStart);
-    cout << "Total execution time: " << totalDuration_SEC.count() << " seconds" << endl;
-    cout << "Average execution time: " << totalDuration.count()/missingEdges.size() << " ms" << endl;
 }
 
-void test(){
-    string filename = "grapht.adjlist";
-    Graph g;
-    g.readGraph(filename);
-    auto ans = make_pair(1e9,(int)1e9);
-    ans = g.compute(true);
-}
-
-int main(){
-    for(int i=0;i<=6;i++){
-        string ss = "graph"+to_string(i)+".adjlist";
-        solve_parallel(ss);
+int main(int argc, char* argv[]){
+    string filename;
+    if (argc < 2){
+        cout<<"ENTER THE FILENAME: ";
+        cin>>filename;
+    }else{
+        filename = argv[1];
     }
+    solve_parallel(filename);
     return 0;   
 }

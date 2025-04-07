@@ -8,7 +8,7 @@ Minimum Stress Centrality: 3
 BETWEENNESS minimized at edge: (1, 3)
 STRESS minimized at edge: (1, 3)
 Total execution time: 0 seconds
-Average execution time: 2 ms
+Average execution time: 0 ms
 Initial betweenness centrality: 3231.04 12864
 Total missing edges to process: 19309
 0 done 
@@ -138,5 +138,26 @@ Minimum Betweenness Centrality: 2442.2
 Minimum Stress Centrality: 12171
 BETWEENNESS minimized at edge: (0, 167)
 STRESS minimized at edge: (12, 158)
-Total execution time: 26 seconds
+Total execution time: 31 seconds
 Average execution time: 1 ms
+Initial betweenness centrality: 1064.73 5699
+Total missing edges to process: 10450
+0 done 
+1000 done 
+2000 done 
+3000 done 
+4000 done 
+5000 done 
+6000 done 
+7000 done 
+8000 done 
+9000 done 
+10000 done 
+
+Final Results:
+Minimum Betweenness Centrality: 1034.77
+Minimum Stress Centrality: 5578
+BETWEENNESS minimized at edge: (9, 113)
+STRESS minimized at edge: (7, 90)
+Total execution time: 8 seconds
+Average execution time: 0 ms

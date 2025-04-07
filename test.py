@@ -8,7 +8,7 @@ from collections import defaultdict
 def generate_graph():
     while True:
         n = random.randint(10,50)
-        m = random.randint(1, min(20, n-1))  # Reduced m range for more interesting graphs
+        m = random.randint(1, min(20, n-1))
         G = nx.barabasi_albert_graph(n, m)
         if nx.is_connected(G):
             return G
