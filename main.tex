@@ -1,0 +1,298 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+
+\title{CS552 Assignment: Minimizing Maximum Betweenness Centrality and Stress Centrality via Link Addition}
+% \author{
+%     Mohd Adil (12141080) \and 
+%     Shubham Daule (12141550) \and
+%     R.V. Nayan (12141340) \and
+%     Ayush Kataria (12140010)
+% }
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	This report investigates methods to minimize the maximum betweenness centrality and stress centrality in networks through strategic link addition. We present our methodology for computing centrality measures, identifying optimal links, and optimizing the implementation. The report includes algorithm complexity analysis and experimental results comparing our approach with brute-force methods.
+\end{abstract}
+
+\section{Introduction}
+Betweenness centrality and stress centrality are key metrics in network analysis that measure a node's influence based on its position in shortest paths. This report examines the problem of minimizing the maximum centrality values in a network through strategic link addition, which can improve network robustness and efficiency.
+
+\section{Methodology}
+% \subsection{Finding Edges with Highest Betweenness and Stress Centrality}
+% We implement Brandes' algorithm to efficiently compute centrality values and identify nodes with maximum betweenness and stress centrality.
+
+\subsection{Computing Centrality Measures}
+
+We used modified version of Brandes' algorithm to allow efficient computation of both
+betweenness centrality and stress centrality in single traversal per source
+node.
+
+\subsection*{Definitions}
+
+Let \( G = (V, E) \) be an unweighted, undirected graph where \( V \) is the set
+of nodes and \( E \) is the set of edges.
+
+\begin{itemize}
+	\item Let \( \sigma_{st} \) denote the number of shortest paths from node \( s \) to node \( t \).
+	\item Let \( \sigma_{st}(v) \) be the number of those paths that pass through node \( v \).
+	\item The \textbf{betweenness centrality} of node \( v \) is defined as:
+	      \[
+		      C_B(v) = \sum_{s \ne v \ne t} \frac{\sigma_{st}(v)}{\sigma_{st}}
+	      \]
+	\item The \textbf{stress centrality} of node \( v \) is the total number of shortest paths passing through \( v \):
+	      \[
+		      C_S(v) = \sum_{s \ne v \ne t} \sigma_{st}(v)
+	      \]
+\end{itemize}
+
+\subsection*{Algorithm Overview}
+
+The algorithm operates in two main phases:
+\begin{enumerate}
+	\item \textbf{Forward Phase (BFS):} Computes shortest path counts \( \sigma
+	      \), distances, and predecessor lists for each source node \( s \).
+	\item \textbf{Backward Phase (Dependency Accumulation):} Accumulates
+	      dependencies in reverse topological order to compute centrality
+	      contributions.
+\end{enumerate}
+
+
+\begin{itemize}
+	\item \textbf{Forward Phase (BFS):}
+	      For a given source node \( s \), perform a Breadth-First Search (BFS) to compute:
+	      \begin{itemize}
+		      \item \( \sigma(v) \): The number of shortest paths from node \( s \) to node \( v \).
+		      \item \( \text{dist}(v) \): The shortest path distance from \( s \) to \( v \).
+		      \item \( \text{pred}(v) \): The list of predecessor nodes of \( v \) on shortest paths from \( s \).
+	      \end{itemize}
+
+	\item \textbf{Backward Phase (Dependency Accumulation):}
+	      Traverse the BFS tree in reverse topological order to compute dependencies:
+	      \begin{itemize}
+		      \item \( \delta_1(v) \): Standard Brandes' dependency score, representing the fraction of shortest paths that pass through node \( v \). It contributes to \textbf{betweenness centrality}.
+		            \[
+			            \delta_1(v) = \sum_{w : v \in \text{pred}(w)} \frac{\sigma(v)}{\sigma(w)} (1 + \delta_1(w))
+		            \]
+
+		      \item \( \delta_2(v) \): Dependency count defined as the number of
+		            shortest paths that originate at \( v \) and end at nodes deeper in
+		            the BFS tree (i.e., at a greater distance from \( s \)). This is
+		            used for stress centrality computation.
+	      \end{itemize}
+
+	\item \textbf{Stress Centrality Contribution:}
+	      For each node \( v \) (excluding source \( s \)):
+	      \[
+		      \text{stress}(v) += \sigma(v) \cdot \delta_2(v)
+	      \]
+	      This captures the total number of shortest paths passing through \( v \), weighted by the number of paths that originate at \( v \) and reach further nodes.
+
+	\item \textbf{Note:}
+	      \textit{Betweenness centrality} is accumulated using \( \delta_1 \),
+	      while \textit{stress centrality} is accumulated using the product \(
+	      \sigma(v) \cdot \delta_2(v) \). Both values are halved after all
+	      iterations to account for double-counting in undirected graphs.
+
+	      \textbf{Why it works:} The total number of shortest paths passing through a node \( v \)
+	      can be understood combinatorially. Each such path can be viewed as a concatenation of:
+	      \begin{itemize}
+		      \item A shortest path from the source \( s \) to \( v \), counted by \( \sigma(v) \), and
+		      \item A continuation from \( v \) to deeper nodes in the BFS tree, counted by \( \delta_2(v) \).
+	      \end{itemize}
+	      Hence, the total number of full paths going through \( v \) is the product \( \sigma(v) \cdot \delta_2(v) \),
+	      which represents all ways in which a path reaching \( v \) can be extended further down the tree.
+\end{itemize}
+
+The following pseudocode summarizes the approach:
+
+\begin{algorithm}[H]
+	\caption{Compute Betweenness and Stress Centrality (\texttt{g.compute()})}
+
+	\KwIn{Adjacency list \texttt{adj} representing graph \( G \)}
+
+	\KwOut{Maximum betweenness and stress centrality values}
+
+	\ForEach{source node \( s \in V \)}{
+		Initialize \( \texttt{dist}[v] \gets -1, \texttt{sigma}[v] \gets 0, \texttt{pred}[v] \gets [] \) for all \( v \in V \) \\
+		Set \( \texttt{dist}[s] \gets 0, \texttt{sigma}[s] \gets 1 \) \\
+		Initialize empty queue \( Q \), stack \( S \) \\
+		Enqueue \( s \) into \( Q \)
+
+		\While{\( Q \) not empty}{
+			Dequeue \( v \gets Q \), push \( v \) into \( S \) \\
+			\ForEach{neighbor \( w \in \texttt{adj}[v] \)}{
+				\If{\( \texttt{dist}[w] < 0 \)}{
+					\( \texttt{dist}[w] \gets \texttt{dist}[v] + 1 \) \\
+					Enqueue \( w \)
+				}
+				\If{\( \texttt{dist}[w] = \texttt{dist}[v] + 1 \)}{
+					\( \texttt{sigma}[w] += \texttt{sigma}[v] \) \\
+					Append \( v \) to \( \texttt{pred}[w] \)
+				}
+			}
+		}
+
+		Initialize \( \delta[v] \gets 0.0, \delta_2[v] \gets 0 \) for all \( v \in V \)
+
+		\While{\( S \) not empty}{
+			Pop \( w \gets S \) \\
+			\ForEach{predecessor \( v \in \texttt{pred}[w] \)}{
+				\( \texttt{contrib} \gets \frac{\sigma[v]}{\sigma[w]}(1 + \delta[w]) \) \\
+				\( \delta[v] += \texttt{contrib} \) \\
+				\( \delta_2[v] += \delta_2[w] + 1 \)
+			}
+			\If{\( w \ne s \)}{
+				\( \texttt{betweenness}[w] += \delta[w] \) \\
+				\( \texttt{stress}[w] += \delta_2[w] \cdot \sigma[w] \)
+			}
+		}
+	}
+
+	Divide all \( \texttt{betweenness}[v] \) and \( \texttt{stress}[v] \) values by 2 (for undirected graph symmetry)
+
+	Return maximum values of betweenness and stress arrays
+\end{algorithm}
+
+
+\subsection{Identifying Optimal Missing Links}
+
+\begin{itemize}
+	% \item \textbf{Graph Initialization:}
+	%       A graph is constructed from input data representing the existing network topology.
+
+	\item \textbf{Baseline Centrality Computation:}
+	      Initial values of betweenness centrality and stress centrality are computed for the graph.
+
+	\item \textbf{Identification of Candidate Edges:}
+	      All missing edges (i.e., pairs of nodes not currently connected) are identified as potential additions to the network.
+
+	\item \textbf{Iterative Edge Evaluation:}
+	      For each edge candidate,
+	      \begin{itemize}
+		      \item Missing edge is temporarily added to the graph.
+		      \item Centrality measures are recomputed with the edge included.
+		      \item If a new minimum for either betweenness or stress centrality is found, it is recorded along with the corresponding edge.
+		      \item The edge is then removed before evaluating the next candidate.
+	      \end{itemize}
+
+	\item \textbf{Final Selection:}
+	      After evaluating all missing edges, the edges that result in the lowest
+	      maximum betweenness and stress centrality are reported.
+\end{itemize}
+
+
+% \subsection{Code Optimization Techniques}
+% We discuss implementation optimizations including parallel computation and
+% efficient data structures to handle large networks.
+
+\section{Algorithm Complexity Analysis}
+\subsection{Time Complexity}
+% We analyze and compare the time complexity of our optimized approach ($O(nm)$) versus the brute-force method ($O(n^5)$).
+
+
+Let \( V \) be the number of vertices and \( E \) be the number of existing edges in the input graph. Let \( M \) be the number of missing edges, i.e., \( M = \binom{V}{2} - E \).
+
+\begin{itemize}
+	\item \textbf{Single Centrality Computation (\texttt{g.compute()})}
+	      The function is based on Brandes' algorithm and computes both betweenness and stress centrality. For an unweighted graph:
+	      \[
+		      \text{Time complexity} = \mathcal{O}(V \cdot (V + E))
+	      \]
+
+	\item \textbf{Missing Edge Enumeration (\texttt{g.findMissingEdges()})}
+	      All unordered pairs of nodes not connected by an edge are collected:
+	      \[
+		      \text{Time complexity} = \mathcal{O}(V^2)
+	      \]
+	      (assuming adjacency matrix check or linear scan per pair).
+
+	\item \textbf{Main Evaluation Loop}
+	      For each missing edge:
+	      \begin{itemize}
+		      \item Temporarily add the edge.
+		      \item Run \texttt{g.compute()}.
+		      \item Remove the edge.
+	      \end{itemize}
+	      There are \( M \) such iterations. Each iteration costs \( \mathcal{O}(V \cdot (V + E)) \). Hence, total time complexity:
+	      \[
+		      \mathcal{O}(M \cdot V \cdot (V + E)) = \mathcal{O}((V^2 - E) \cdot V \cdot (V + E))
+	      \]
+
+	\item \textbf{Overall Time Complexity}
+	      \[
+		      \mathcal{O}(V^3 \cdot (V + E) - V \cdot E \cdot (V + E))
+	      \]
+	      In the worst case (sparse graph), this simplifies to:
+	      \[
+		      \mathcal{O}(V^4)
+	      \]
+\end{itemize}
+
+\noindent
+\textbf{Conclusion:} The time complexity of our algorithm is better than brute
+force \( \mathcal{O}(V^5) \)
+
+\section{Experimental Results}
+\subsection{Testing and Validation}
+
+To validate the correctness of the implementation, Barabási-Albert graphs of
+varying sizes were generated. The results produced by the algorithm were
+cross-verified against those obtained from a simple brute-force approach.
+
+
+\subsection{Result Summary}
+
+\begin{table}[h]
+	\centering
+	\caption{Centrality Minimization Results}
+	\begin{tabular}{|c|c|c|c|c|}
+		\hline
+		\textbf{Graph} & \textbf{Min Betweenness} & \textbf{Edge (Betweenness)} & \textbf{Min Stress} & \textbf{Edge (Stress)} \\
+		\hline
+		Graph 1        & 3154.06                  & (2, 168)                    & 12580               & (12, 168)              \\
+		Graph 2        & 1537.55                  & (8, 138)                    & 7619                & (37, 79)               \\
+		Graph 3        & 2765.33                  & (8, 180)                    & 14048               & (8, 93)                \\
+		Graph 4        & 2097.19                  & (17, 35)                    & 8529                & (17, 35)               \\
+		Graph 5        & 2442.20                  & (0, 167)                    & 12171               & (12, 158)              \\
+		Graph 6        & 1034.77                  & (9, 113)                    & 5578                & (4, 90)                \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\subsection{Performance}
+
+\begin{table}[h]
+	\begin{center}
+		\captionsetup{type=table}
+		\begin{tabular}{|c|c|c|}
+			\hline
+			\textbf{Graph} & \textbf{Time taken - parallel (sec)} &
+			\textbf{Time taken - sequential(sec)}                          \\
+			\hline
+			Graph 1        & 33.98                                & 108.68 \\
+			Graph 2        & 11.92                                & 39.31  \\
+			Graph 3        & 41.97                                & 133.80 \\
+			Graph 4        & 9.79                                 & 46.36  \\
+			Graph 5        & 28.64                                & 126.17 \\
+			Graph 6        & 10.56                                & 42.41  \\
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

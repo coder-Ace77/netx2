@@ -81,6 +81,7 @@ public:
         if(pred.size()<V){
             pred.resize(V,vector<int> (V));
         }
+
         double betweenness[V]={0.0};
         long long stress[V]={0};
         int dist[V]={-1};
@@ -90,13 +91,20 @@ public:
         queue<int> Q;
         double max_bet = 0.0;
         long long max_stress = 0;
+
         for (int s=0;s<V;++s){
+            /*
+                * Loop Invariates:
+                    * S is empty.
+                    * Q is empty
+            */
             fill(predIND,predIND+V,0);
             fill(dist,dist+V,-1);
             fill(sigma,sigma+V,0ll); 
             dist[s]=0;
             sigma[s]=1;
             Q.push(s);
+
             while(!Q.empty()){
                 int v = Q.front();
                 Q.pop();
@@ -113,7 +121,7 @@ public:
                         ++predIND[w];
                     }
                 }
-            }    
+            }
             double delta[V]={0.0};
             long long delta2[V]={0};
             while (!S.empty()){
@@ -128,7 +136,7 @@ public:
                 if (w != s) {
                     betweenness[w]+=delta[w];
                     stress[w]+=delta2[w]*sigma[w];
-                }              
+                }
             }
         }
         for (int i=0;i<V;++i){
@@ -246,7 +254,7 @@ void solve_sequential(const string& filename){
         g.adj[x.second].pop_back();
         ans = {min_betweenness, min_stress};
         ++cnt;
-        if(cnt%100==0)cout<<cnt<<" done\n";
+        // if(cnt%100==0)cout<<cnt<<" done\n";
     }
 
     cout << "\nFinal Results:" << endl;
