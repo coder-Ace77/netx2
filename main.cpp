@@ -19,21 +19,18 @@ public:
     vector<vector<int>> adj;
     vector<pair<int, int>> edges;  
         
-    void readGraph(const string& filename) {
+    void readGraph(const string& filename){
         ifstream file(filename);
         if (!file.is_open()) {
             cerr << "Error opening file: " << filename << endl;
             return;
         }
-    
+
         edges.clear();
         string line;
         int maxNode = 0;
-    
-        unordered_set<long long> edgeSet;
-        vector<pair<int, int>> edgeList;
-    
-        while (getline(file, line)) {
+        set<pair<int,int>> edgeSet;
+        while (getline(file, line)){
             if (line.empty() || line[0] == '#') continue;
     
             istringstream iss(line);
@@ -43,26 +40,20 @@ public:
             int v;
             while (iss >> v) {
                 if (u == v) continue;
-    
-                int a = min(u, v);
                 int b = max(u, v);
-                long long hash = ((long long)a << 32) | b;
-    
-                if (edgeSet.insert(hash).second) {
-                    edgeList.emplace_back(a, b);
-                    edges.emplace_back(a, b);
-                    maxNode = max(maxNode,max(a,b));
-                }
+                maxNode = max(maxNode, b);
+                if(u>v) swap(u, v);
+                edgeSet.insert({u,v});
             }
         }
     
         adj.clear();
         adj.resize(maxNode + 1);
-        for (auto [u, v] : edgeList) {
+        for (auto [u, v] : edgeSet){
+            edges.push_back({u, v});
             adj[u].push_back(v);
             adj[v].push_back(u);
         }
-    
         file.close();
     }
     
