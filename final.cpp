@@ -158,11 +158,7 @@ void solve_parallel(const string& filename,bool metrics = false , bool test = fa
     pair<int, int> ed2 = {-1, -1};
     double min_betweenness = ans.first;
     long long min_stress = ans.second;
-    if(metrics){
-        cout << "Initial betweenness centrality: " << ans.first << " " << ans.second << endl;
-        cout << "Total missing edges to process: " << missingEdges.size() << endl;
-    }
-    auto totalStart = high_resolution_clock::now();
+
     #pragma omp parallel
     {
         Graph local_g = g;
@@ -188,12 +184,10 @@ void solve_parallel(const string& filename,bool metrics = false , bool test = fa
 
             local_g.adj[x.first].pop_back();
             local_g.adj[x.second].pop_back();
-            if(metrics){
-                #pragma omp critical
-                {
-                    if (i % 1000 == 0) {
-                        cout << i << " done \n";
-                    }
+            #pragma omp critical
+            {
+                if (i % 1000 == 0) {
+                    cout<<"#";
                 }
             }
         }
@@ -210,26 +204,7 @@ void solve_parallel(const string& filename,bool metrics = false , bool test = fa
             }
         }
     }
-
-    if(metrics){
-        auto totalEnd = high_resolution_clock::now();
-        auto totalDuration = duration_cast<milliseconds>(totalEnd - totalStart);
-        auto totalDuration_SEC = duration_cast<seconds>(totalEnd - totalStart);
-        cout << "\nFinal Results:" << endl;
-        cout << "Minimum Betweenness Centrality: " << min_betweenness << endl;
-        cout << "Minimum Stress Centrality: " << min_stress << endl;
-        cout << "BETWEENNESS minimized at edge: (" << ed1.first << ", " << ed1.second << ")" << endl;
-        cout << "STRESS minimized at edge: (" << ed2.first << ", " << ed2.second << ")" << endl;
-        cout << "Total execution time: " << totalDuration_SEC.count() << " seconds" << endl;
-        cout << "Average execution time: " << totalDuration.count() / missingEdges.size() << " ms" << endl;
-    }
-
-    if(test){
-        cout<<ans.first<<" "<<ans.second<<endl;
-        cout<<ed1.first<<" "<<ed1.second<<endl;
-        cout<<ed2.first<<" "<<ed2.second<<endl;
-    }
-
+    cout<<endl;
     cout << "\nFinal Results:" << endl;
     cout << "Minimum Betweenness Centrality: " << min_betweenness << endl;
     cout << "Minimum Stress Centrality: " << min_stress << endl;
