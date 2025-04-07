@@ -50,6 +50,7 @@ public:
     
                 if (edgeSet.insert(hash).second) {
                     edgeList.emplace_back(a, b);
+                    edges.emplace_back(a, b);
                     maxNode = max(maxNode,max(a,b));
                 }
             }
@@ -73,10 +74,9 @@ public:
     vector<pair<int, int>> findMissingEdges(){
         vector<pair<int, int>> missingEdges;
         set<pair<int,int>> existingEdges(edges.begin(), edges.end());
-        cout << "Existing edges: " << existingEdges.size() << endl;
         for (int u = 0; u < adj.size(); ++u) {
-            for (int v = u+1; v < adj.size(); ++v) {
-                if(existingEdges.count({u,v}) == 0) {
+            for (int v = u+1; v < adj.size(); ++v){
+                if(existingEdges.count({u,v}) == 0){
                     missingEdges.push_back({u,v});
                 }
             }
@@ -126,6 +126,7 @@ public:
                 }
             }    
             double delta[V]={0.0};
+            long long delta2[V]={0};
             while (!S.empty()){
                 int w = S.top();
                 S.pop();
@@ -133,20 +134,22 @@ public:
                     int v = pred[w][i];
                     double contrib = ((double)sigma[v]*(1.0 + delta[w]))/sigma[w];
                     delta[v] += contrib;
-                    if (v != s) {
-                        stress[v] += sigma[v];
-                    }
+                    delta2[v] += (delta2[w]+1);
                 }
                 if (w != s) {
-                    betweenness[w]+=delta[w]/2.0;
+                    betweenness[w]+=delta[w];
+                    long long val=delta2[w]*sigma[w];
+                    stress[w]+=val;
                 }              
             }
         }
         for (int i=0;i<V;++i){
-            if (betweenness[i] > max_bet) {
+            betweenness[i]/=2.0;
+            stress[i]/=2;
+            if (betweenness[i] > max_bet){
                 max_bet = betweenness[i];
             }
-            if (stress[i] > max_stress) {
+            if(stress[i]>max_stress){
                 max_stress = stress[i];
             }
         }
@@ -230,7 +233,7 @@ void solve_sequential(const string& filename){
     g.readGraph(filename);
     auto ans = make_pair(1e9,(int)1e9);
     ans = g.compute(ans);
-    cout << "Initial betweenness centrality: " << ans.first<<" "<<ans.second << endl;
+    cout << "Initial betweenness centrality, stress centrality : " << ans.first<<" "<<ans.second << endl;
     auto missingEdges = g.findMissingEdges();
     cout << "Total missing edges to process: " << missingEdges.size() << endl;
 
@@ -243,7 +246,6 @@ void solve_sequential(const string& filename){
     auto totalStart = high_resolution_clock::now();
 
     for (size_t i = 0; i < missingEdges.size(); ++i) {
-        
         auto x = missingEdges[i];
         g.addEdge(x.first, x.second);
         auto temp = g.compute(ans);
@@ -259,8 +261,8 @@ void solve_sequential(const string& filename){
         g.adj[x.first].pop_back();
         g.adj[x.second].pop_back();
         ans = {min_betweenness, min_stress};
-        if(cnt%1000==0)cout<<cnt<<" done\n";
         ++cnt;
+        if(cnt%100==0)cout<<cnt<<" done\n";
     }
 
     cout << "\nFinal Results:" << endl;
@@ -282,5 +284,6 @@ int main(){
         string ss = "graph"+to_string(i)+".adjlist";
         solve_parallel(ss);
     }
+    // solve_sequential("graph1.adjlist");
     return 0;   
 }
